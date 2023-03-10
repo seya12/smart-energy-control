@@ -31,8 +31,8 @@ public class HomeManager {
             .orElseThrow()
             .createAirConditionApi();
 
-    currentTemperatures = new CustomArrayList<>(10);
-    producedPower = new CustomArrayList<>(10);
+    currentTemperatures = new CustomArrayList<>(3);
+    producedPower = new CustomArrayList<>(3);
   }
 
   public void start(){
@@ -41,11 +41,15 @@ public class HomeManager {
   }
 
   private void performLogic(TimerEvent timerEvent) {
+    //System.out.println("Step "+timerEvent.getTickCount());
     currentTemperatures.add(airConditionApi.getRoomTemperature());
     producedPower.add(inverterApi.getActualCurrent());
 
     var avgTemp = currentTemperatures.stream().mapToDouble(d -> d).average().orElse(0.0);
     var avgPower = producedPower.stream().mapToDouble(d -> d).average().orElse(0.0);
+    //System.out.println("Avg Temp: " + avgTemp + "List: " + currentTemperatures.toString());
+    //System.out.println("Avg Power: " + avgPower + "List: " + producedPower.toString());
+
     boolean turnAirConditionOff = avgTemp < 22;
     boolean tooWarm = avgTemp > 24;
     boolean enoughPower = avgPower > 0.1;
@@ -54,6 +58,8 @@ public class HomeManager {
       airConditionApi.turnOff();
     } else if (tooWarm && enoughPower) {
       airConditionApi.turnOn();
+    } else{
+      System.out.println("Nothing changed");
     }
   }
 

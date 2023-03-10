@@ -18,6 +18,10 @@ public class AirConditionApiImpl implements AirConditionApi {
 
   @Override
   public void turnOff() {
+    if(!this.running){
+      System.out.println("AC already switched off");
+      return;
+    }
     this.running = false;
     System.out.println("Switched AC off");
   }

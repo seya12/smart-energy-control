@@ -17,9 +17,8 @@ public class CustomArrayList<E> extends ArrayList<E> {
     public boolean add(E e) {
         if(currentElements == capacity) {
             remove(0);
-            capacity--;
         } else{
-            capacity++;
+            currentElements++;
         }
         return super.add(e);
     }
