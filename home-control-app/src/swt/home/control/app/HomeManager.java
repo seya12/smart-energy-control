@@ -14,8 +14,8 @@ public class HomeManager {
   private final InverterApi inverterApi;
   private final AirConditionApi airConditionApi;
   private final ElectricBoilerApi electricBoilerApi;
-  private final List<Double> currentTemperatures;
-  private final List<Double> producedPower;
+  private final Queue<Double> currentTemperatures;
+  private final Queue<Double> producedPower;
 
 
   public HomeManager() {
@@ -39,8 +39,8 @@ public class HomeManager {
       .orElseThrow()
       .createElectricBoilerApi();
 
-    currentTemperatures = new CustomArrayList<>(3);
-    producedPower = new CustomArrayList<>(3);
+    currentTemperatures = new CustomArrayBlockingQueue<>(3);
+    producedPower = new CustomArrayBlockingQueue<>(3);
   }
 
   public void start() {
@@ -55,8 +55,8 @@ public class HomeManager {
 
     var avgTemp = currentTemperatures.stream().mapToDouble(d -> d).average().orElse(0.0);
     var avgPower = producedPower.stream().mapToDouble(d -> d).average().orElse(0.0);
-    //System.out.println("Avg Temp: " + avgTemp + "List: " + currentTemperatures.toString());
-    //System.out.println("Avg Power: " + avgPower + "List: " + producedPower.toString());
+    System.out.println("Avg Temp: " + avgTemp + "List: " + currentTemperatures);
+    System.out.println("Avg Power: " + avgPower + "List: " + producedPower);
 
     boolean turnAirConditionOff = avgTemp < 22;
     boolean roomTemperatureTooWarm = avgTemp > 24;
