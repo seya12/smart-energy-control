@@ -2,6 +2,7 @@ package swt.home.control.app;
 
 import swt.ac.control.*;
 import swt.balcony.powerplant.*;
+import swt.electric.boiler.*;
 import swt.timer.beans.Timer;
 import swt.timer.beans.*;
 
@@ -9,33 +10,40 @@ import java.util.*;
 
 public class HomeManager {
 
-  private Timer timer;
-  private InverterApi inverterApi;
-  private AirConditionApi airConditionApi;
-  private List<Double> currentTemperatures;
-  private List<Double> producedPower;
+  private final Timer timer;
+  private final InverterApi inverterApi;
+  private final AirConditionApi airConditionApi;
+  private final ElectricBoilerApi electricBoilerApi;
+  private final List<Double> currentTemperatures;
+  private final List<Double> producedPower;
 
-  public HomeManager(){
-     timer = ServiceLoader.load(TimerProvider.class)
-            .findFirst()
-            .orElseThrow()
-            .createTimer(1000, 1000);
 
-     inverterApi = ServiceLoader.load(InverterApiProvider.class)
-            .findFirst()
-            .orElseThrow()
-            .createInverterApi();
+  public HomeManager() {
+    timer = ServiceLoader.load(TimerProvider.class)
+      .findFirst()
+      .orElseThrow()
+      .createTimer(1000, 1000);
 
-     airConditionApi = ServiceLoader.load(AirConditionApiProvider.class)
-            .findFirst()
-            .orElseThrow()
-            .createAirConditionApi();
+    inverterApi = ServiceLoader.load(InverterApiProvider.class)
+      .findFirst()
+      .orElseThrow()
+      .createInverterApi();
+
+    airConditionApi = ServiceLoader.load(AirConditionApiProvider.class)
+      .findFirst()
+      .orElseThrow()
+      .createAirConditionApi();
+
+    electricBoilerApi = ServiceLoader.load(ElectricBoilerApiProvider.class)
+      .findFirst()
+      .orElseThrow()
+      .createElectricBoilerApi();
 
     currentTemperatures = new CustomArrayList<>(3);
     producedPower = new CustomArrayList<>(3);
   }
 
-  public void start(){
+  public void start() {
     timer.addTimerListener(this::performLogic);
     timer.start();
   }
@@ -51,15 +59,21 @@ public class HomeManager {
     //System.out.println("Avg Power: " + avgPower + "List: " + producedPower.toString());
 
     boolean turnAirConditionOff = avgTemp < 22;
-    boolean tooWarm = avgTemp > 24;
-    boolean enoughPower = avgPower > 0.1;
+    boolean roomTemperatureTooWarm = avgTemp > 24;
+    boolean enoughPowerForAC = avgPower > 0.1;
+    boolean enoughPowerForBoiler = avgPower > 0.4;
+    boolean boilerTooCold = electricBoilerApi.getBoilerTemperature() < 40;
 
-    if(turnAirConditionOff){
+    if (turnAirConditionOff) {
       airConditionApi.turnOff();
-    } else if (tooWarm && enoughPower) {
+    } else if (roomTemperatureTooWarm && enoughPowerForAC) {
       airConditionApi.turnOn();
-    } else{
+    } else {
       System.out.println("Nothing changed");
+    }
+
+    if (enoughPowerForBoiler && boilerTooCold) {
+      electricBoilerApi.turnOn();
     }
   }
 

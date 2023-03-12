@@ -1,14 +1,24 @@
 package swt.ac.control.impl;
 
 import swt.ac.control.*;
+import swt.noise.generator.*;
+
+import java.util.*;
 
 public class AirConditionApiImpl implements AirConditionApi {
-
   private boolean running = false;
+  private final NoiseApi noiseApi;
+
+  public AirConditionApiImpl() {
+    noiseApi = ServiceLoader.load(NoiseApiProvider.class)
+      .findFirst()
+      .orElseThrow()
+      .createNoiseApi();
+  }
 
   @Override
   public void turnOn() {
-    if(this.running){
+    if (this.running) {
       System.out.println("AC already running");
       return;
     }
@@ -18,7 +28,7 @@ public class AirConditionApiImpl implements AirConditionApi {
 
   @Override
   public void turnOff() {
-    if(!this.running){
+    if (!this.running) {
       System.out.println("AC already switched off");
       return;
     }
@@ -28,6 +38,6 @@ public class AirConditionApiImpl implements AirConditionApi {
 
   @Override
   public double getRoomTemperature() {
-    return Math.random() * 11 + 19; //between 19.0 and 30.0
+    return noiseApi.noise(19.0, 30.0); //between 19.0 and 30.0
   }
 }

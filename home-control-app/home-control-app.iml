@@ -10,5 +10,6 @@
     <orderEntry type="module" module-name="timer-bean" />
     <orderEntry type="module" module-name="ac-control" />
     <orderEntry type="module" module-name="balcony-power-plant" />
+    <orderEntry type="module" module-name="boiler-control" />
   </component>
 </module>
